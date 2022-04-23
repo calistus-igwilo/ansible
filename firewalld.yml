@@ -1,0 +1,25 @@
+---
+- name: Manage public ports with firewalld ansible module
+  hosts: app
+  gather_facts: no
+  become: true
+  vars:
+    port_list:
+      - { port: 80/tcp, state: enabled }
+      - { port: 443/tcp, state: enabled }
+      - { port: 8069/tcp, state: enabled }
+  tasks:
+    - name: Enable ports on the list
+      ansible.posix.firewalld:
+        zone: public
+        port: "{{ item.port }}"
+        permanent: true
+        state: "{{ item.state }}"
+      loop: "{{ port_list }}"
+      notify:
+        - Restart firewalld
+  handlers:
+    - name: Restart firewalld
+      service:
+        name: firewalld
+        state: restarted

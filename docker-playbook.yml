@@ -1,0 +1,75 @@
+---
+- name: Install docker
+  gather_facts: No
+  hosts: app
+  become: yes
+
+  tasks:
+    - name: Remove docker if installed
+      yum:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-engine
+        state: removed
+
+    - name: Install yum utils and other packages
+      yum:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - git
+          - wget
+          - bzip2
+        state: present
+
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+      become: yes
+
+    - name: Install Docker
+      package:
+        name: docker-ce
+        state: latest
+      become: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Add user blockchain to docker group
+      user:
+        name: blockchain
+        groups: docker
+        append: yes
+      become: yes
+
+    - name: Install Docker Bash Completion Command
+      get_url:
+        url: https://github.com/docker/docker-ce/blob/master/components/cli/contrib/completion/bash/docker
+        dest: /etc/bash_completion.d/docker
+
+    - name: Ensure docker-compose is installed and available
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+
+    - name: Make docker compose file executable
+      file:
+        path: /usr/local/bin/docker-compose
+        mode: u=rwx,g=rwx,o=rwx
+
+    - name: Install Docker-Compose Bash Completion Command
+      get_url:
+        url: https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose
+        dest: /etc/bash_completion.d/docker-compose

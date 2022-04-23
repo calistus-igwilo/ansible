@@ -1,0 +1,47 @@
+---
+- name: Deploy Odoo files
+  gather_facts: No
+  hosts: app
+  become: yes
+
+  vars:
+    odoo_app_path: /home/blockchain/domineum
+
+  tasks:
+    - name: Create docker compose directory
+      file:
+        path: "{{ odoo_app_path }}"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Create docker config directory
+      file:
+        path: "{{ odoo_app_path }}/config"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Create docker addons directory
+      file:
+        path: "{{ odoo_app_path }}/addons"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Copy docker-compose file
+      copy:
+        src: docker-compose.yml
+        dest: "{{ odoo_app_path }}/docker-compose.yml"
+        owner: root
+        group: root
+
+    - name: Copy odoo config file
+      copy:
+        src: odoo.conf
+        dest: "{{ odoo_app_path }}/config/odoo.conf"
+        owner: root
+        group: root

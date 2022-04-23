@@ -1,0 +1,9 @@
+---
+- name: Reboot remote host
+  hosts: app
+  become: yes
+
+  tasks:
+    - name: Reboot remote host
+      reboot:
+        msg: "Reboot by Ansible"

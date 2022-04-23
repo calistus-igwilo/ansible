@@ -1,0 +1,41 @@
+---
+- name: Create user on a linux server
+  hosts: app
+  become: yes
+  gather_facts: false
+
+  vars:
+    - user: blockchain
+    - password: 
+  tasks:
+    - name: Create a login user
+      user:
+        name: "{{ user }}"
+        password: "{{ password }}"
+        groups:
+          - wheel
+        shell: "/bin/bash"
+        create_home: true
+        home: /home/{{ user }}
+        state: present
+        generate_ssh_key: true
+
+    - name: Add public key to authorized_keys
+      authorized_key:
+        user: "{{ user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Deny root from logging in
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^(#)?PermitRootLogin \w*$'
+        line: "PermitRootLogin no"
+        state: present
+
+    - name: Add {{ user }} to sudoers file
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        regexp: "^{{ user }}"
+        line: "{{ user }} ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"

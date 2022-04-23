@@ -1,0 +1,11 @@
+---
+- name: Install packages
+  hosts: app
+  become: yes
+
+  tasks:
+    - name: Install a list of packages
+      yum:
+        name:
+          - unzip
+        state: present

@@ -1,0 +1,27 @@
+---
+- hosts: app
+  become: true
+  tasks:
+    - name: Ensure NTP (for the synchronization) is installed
+      yum: name=ntp state=present
+
+    - name: Ensure NTP is running.
+      service: name=ntpd state=started enabled=yes
+
+    - name: set timezone to Africa/Lagos
+      timezone:
+        name: Africa/Lagos
+
+    - name: Set a hostname specifying strategy
+      ansible.builtin.hostname:
+        name: training.domineum.io
+        use: systemd
+
+    - name: Copy Server Welcome Message to server
+      ansible.builtin.copy:
+        src: motd
+        dest: /etc/motd
+        owner: root
+        mode: "0644"
+
+   
