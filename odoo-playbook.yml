@@ -6,21 +6,22 @@
 
   vars:
     odoo_app_path: /home/blockchain/domineum
+    odoo_user: blockchain
 
   tasks:
     - name: Create docker compose directory
       file:
         path: "{{ odoo_app_path }}"
         state: directory
-        mode: '0755'
-        owner: root
-        group: root
+        mode: "0755"
+        owner: "{{ odoo_user }}"
+        group: "{{ odoo_user }}"
 
     - name: Create docker config directory
       file:
         path: "{{ odoo_app_path }}/config"
         state: directory
-        mode: '0755'
+        mode: "0755"
         owner: root
         group: root
 
@@ -28,7 +29,7 @@
       file:
         path: "{{ odoo_app_path }}/addons"
         state: directory
-        mode: '0755'
+        mode: "0755"
         owner: root
         group: root
 
@@ -36,8 +37,8 @@
       copy:
         src: docker-compose.yml
         dest: "{{ odoo_app_path }}/docker-compose.yml"
-        owner: root
-        group: root
+        owner: "{{ odoo_user }}"
+        group: "{{ odoo_user }}"
 
     - name: Copy odoo config file
       copy:

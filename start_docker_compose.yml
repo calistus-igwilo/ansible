@@ -1,0 +1,15 @@
+---
+- name: Start Odoo containers with docker-compose
+  gather_facts: No
+  hosts: app
+  become: false
+
+
+  tasks:
+    - name: Change to docker-compose directory 
+      file:
+        path: "{{ odoo_app_path }}"
+        state: directory
+        mode: "0755"
+        owner: "{{ odoo_user }}"
+        group: "{{ odoo_user }}"
