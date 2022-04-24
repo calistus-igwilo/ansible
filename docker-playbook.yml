@@ -1,7 +1,7 @@
 ---
-- name: Install docker
-  gather_facts: No
+- name: Install docker on CentOS
   hosts: app
+  gather_facts: No
   become: yes
 
   vars:
@@ -26,35 +26,37 @@
           - yum-utils
           - device-mapper-persistent-data
           - lvm2
-          - wget
           - bzip2
+          - python3-pip
+          - python3-setuptools
+          - ca-certificates
         state: present
 
     - name: Add Docker repo
       get_url:
         url: https://download.docker.com/linux/centos/docker-ce.repo
         dest: /etc/yum.repos.d/docer-ce.repo
-      become: yes
 
     - name: Install Docker
       package:
         name: docker-ce
         state: latest
-      become: yes
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
 
     - name: Start Docker service
       service:
         name: docker
         state: started
         enabled: yes
-      become: yes
 
     - name: Add user to docker group
       user:
         name: { { user } }
         groups: docker
         append: yes
-      become: yes
 
     - name: Install Docker Bash Completion Command
       get_url:
@@ -70,8 +72,3 @@
       file:
         path: /usr/local/bin/docker-compose
         mode: u=rwx,g=rwx,o=rwx
-
-    - name: Install Docker-Compose Bash Completion Command
-      get_url:
-        url: https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/bash/docker-compose
-        dest: /etc/bash_completion.d/docker-compose

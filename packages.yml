@@ -8,4 +8,6 @@
       yum:
         name:
           - unzip
+          - curl
+          - git
         state: present

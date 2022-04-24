@@ -1,6 +1,11 @@
 ---
 - hosts: app
   become: true
+  gather_facts: false
+
+  vars: 
+    hostname: vps1.domineum.io
+
   tasks:
     - name: Ensure NTP (for the synchronization) is installed
       yum: name=ntp state=present
@@ -14,7 +19,7 @@
 
     - name: Set a hostname specifying strategy
       ansible.builtin.hostname:
-        name: training.domineum.io
+        name: {{ hostname }}
         use: systemd
 
     - name: Copy Server Welcome Message to server
@@ -23,12 +28,3 @@
         dest: /etc/motd
         owner: root
         mode: "0644"
-
-    - name: Install a list of packages
-      yum:
-        name:
-          - unzip
-          - git
-        state: present
-
-   
