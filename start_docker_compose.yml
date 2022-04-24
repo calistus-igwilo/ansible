@@ -1,15 +1,14 @@
 ---
-- name: Deploy Docker-Compose to spinup containers 
+- name: Deploy Docker-Compose to spin-up containers
   gather_facts: No
   hosts: app
-  become: false
+  become: true
 
-  var:
+  vars:
     project_src: /home/blockchain/domineum
 
   tasks:
-    - name: deploy Docker-Compose to spinup containers
-      docker_compose:
-        project_src: "{{ project_src  }}"
-        files:
-          - docker-compose.yml
+    - name: Run docker-compose up -d
+      shell:
+        cmd: "docker-compose up -d"
+        chdir: "{{ project_src }}"

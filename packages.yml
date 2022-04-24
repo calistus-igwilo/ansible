@@ -1,15 +1,29 @@
 ---
 - name: Install packages
   hosts: app
-  gather_facts: false
+  gather_facts: true
   become: yes
 
   tasks:
+    - name: Enable EPEL Repository on CentOS 7
+      yum:
+        name: epel-release
+        state: latest
+      when: ansible_facts['os_family'] == 'RedHat' and ansible_facts ['distribution_major_version'] == '7'
+
     - name: Install a list of packages
       yum:
         name:
           - unzip
           - curl
-          - git
+          - python-pip
           - python-setuptools
         state: present
+
+    - name: Create a symbolink link to  /usr/local/bin/docker-compose
+      ansible.builtin.file:
+        src: /usr/local/bin/docker-compose
+        dest: /usr/bin/docker-compose
+        owner: root
+        group: root
+        state: link
