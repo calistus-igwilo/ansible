@@ -4,6 +4,9 @@
   hosts: app
   become: yes
 
+  vars:
+    user: blockchain
+
   tasks:
     - name: Remove docker if installed
       yum:
@@ -23,7 +26,6 @@
           - yum-utils
           - device-mapper-persistent-data
           - lvm2
-          - git
           - wget
           - bzip2
         state: present
@@ -47,9 +49,9 @@
         enabled: yes
       become: yes
 
-    - name: Add user blockchain to docker group
+    - name: Add user to docker group
       user:
-        name: blockchain
+        name: { { user } }
         groups: docker
         append: yes
       become: yes

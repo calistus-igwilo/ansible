@@ -24,4 +24,11 @@
         owner: root
         mode: "0644"
 
+    - name: Install a list of packages
+      yum:
+        name:
+          - unzip
+          - git
+        state: present
+
    
