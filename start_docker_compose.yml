@@ -1,15 +1,15 @@
 ---
-- name: Start Odoo containers with docker-compose
+- name: Deploy Docker-Compose to spinup containers 
   gather_facts: No
   hosts: app
   become: false
 
+  var:
+    project_src: /home/blockchain/domineum
 
   tasks:
-    - name: Change to docker-compose directory 
-      file:
-        path: "{{ odoo_app_path }}"
-        state: directory
-        mode: "0755"
-        owner: "{{ odoo_user }}"
-        group: "{{ odoo_user }}"
+    - name: deploy Docker-Compose to spinup containers
+      docker_compose:
+        project_src: "{{ project_src  }}"
+        files:
+          - docker-compose.yml
