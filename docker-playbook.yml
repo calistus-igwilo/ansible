@@ -1,15 +1,15 @@
 ---
-- name: Install docker on CentOS
+- name: Install docker on CentOS or Redhat
   hosts: app
-  gather_facts: No
-  become: yes
+  gather_facts: false
+  become: true
 
   vars:
-    user: blockchain
+    docker_user: blockchain
 
   tasks:
     - name: Remove docker if installed
-      yum:
+      ansible.builtin.yum:
         name:
           - docker
           - docker-client
@@ -21,7 +21,7 @@
         state: removed
 
     - name: Install yum utils and other packages
-      yum:
+      ansible.builtin.yum:
         name:
           - yum-utils
           - device-mapper-persistent-data
@@ -29,34 +29,49 @@
           - bzip2
           - python3-pip
           - python3-setuptools
+          - virtualenv
           - ca-certificates
+          - software-properties-common
         state: present
 
-    - name: Add Docker repo
-      get_url:
-        url: https://download.docker.com/linux/centos/docker-ce.repo
-        dest: /etc/yum.repos.d/docer-ce.repo
+    - name: set mydistribution
+      ansible.builtin.set_fact:
+        mydistribution: "{{ 'rhel' if (ansible_distribution == 'Red Hat Enterprise Linux') else (ansible_distribution | lower) }}"
+
+    - name: Add signing key
+      ansible.builtin.rpm_key:
+        key: "https://download.docker.com/linux/{{ mydistribution }}/gpg"
+        state: present
+
+    - name: Add repository into repo.d list
+      ansible.builtin.yum_repository:
+        name: docker
+        description: docker repository
+        baseurl: "https://download.docker.com/linux/{{ mydistribution }}/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "https://download.docker.com/linux/{{ mydistribution }}/gpg"
 
     - name: Install Docker
-      package:
-        name: docker-ce
+      ansible.builtin.yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
         state: latest
-
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
+        update_cache: true
 
     - name: Start Docker service
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Add user to docker group
       user:
-        name: { { user } }
+        name: "{{ docker_user }}"
         groups: docker
-        append: yes
+        append: true
 
     - name: Install Docker Bash Completion Command
       get_url:

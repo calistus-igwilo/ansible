@@ -12,7 +12,7 @@
       file:
         path: "{{ odoo_app_path }}"
         state: directory
-        mode: 0755
+        mode: '0755'
         owner: root
         group: root
 
@@ -20,7 +20,7 @@
       file:
         path: "{{ odoo_app_path }}/config"
         state: directory
-        mode: 0755
+        mode: '0755'
         owner: root
         group: root
 
@@ -28,7 +28,7 @@
       file:
         path: "{{ odoo_app_path }}/addons"
         state: directory
-        mode: 0755
+        mode: '0755'
         owner: root
         group: root
 
