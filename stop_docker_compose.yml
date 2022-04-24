@@ -1,0 +1,14 @@
+---
+- name: Stop running containers
+  gather_facts: No
+  hosts: app
+  become: true
+
+  vars:
+    project_src: /home/blockchain/domineum
+
+  tasks:
+    - name: docker-compose stop
+      shell:
+        cmd: "docker-compose stop"
+        chdir: "{{ project_src }}"

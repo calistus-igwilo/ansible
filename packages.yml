@@ -19,11 +19,3 @@
           - python-pip
           - python-setuptools
         state: present
-
-    - name: Create a symbolink link to  /usr/local/bin/docker-compose
-      ansible.builtin.file:
-        src: /usr/local/bin/docker-compose
-        dest: /usr/bin/docker-compose
-        owner: root
-        group: root
-        state: link

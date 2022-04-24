@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
   web:
-    image: odoo:15
+    image: odoo:11
     depends_on:
       - db
     ports:
