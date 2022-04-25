@@ -1,0 +1,12 @@
+---
+- name: Unarchive a file that is already on the remote machine
+  gather_facts: false
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Unarchive openeducat on the remote machine
+      ansible.builtin.unarchive:
+        src: /home/blockchain/domineum/addons/web_openeducat-11.0.1.0.0 (1).zip
+        dest: /home/blockchain/domineum/addons/
+        remote_src: yes

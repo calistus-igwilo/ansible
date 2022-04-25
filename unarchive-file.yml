@@ -13,7 +13,7 @@
       file:
         path: "{{ project_dir }}"
         state: directory
-        mode: 0755
+        mode: "0755"
         owner: "{{ dir_owner }}"
         group: "{{ dir_owner }}"
 
@@ -21,3 +21,11 @@
       ansible.builtin.unarchive:
         src: odoo-addons/openeducat_erp-11.0.1.0.0.zip
         dest: "{{ project_dir }}"
+
+    - name: Change permission for directory and files
+      ansible.builtin.file:
+        dest: "{{ project_dir }}"
+        mode: "u=rwX,g=rX,o=rX" # change directories to 755 and files to 644
+        owner: root
+        group: root
+        recurse: true
