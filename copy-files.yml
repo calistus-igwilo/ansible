@@ -5,11 +5,11 @@
   become: true
 
   tasks:
-    - name: Copy formio to remote host
+    - name: Copy docker-compose to remote host
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /home/blockchain/domineum/addons/
         mode: "0644"
         owner: root
       loop:
-        - odoo-addons/web_openeducat-11.0.1.0.0 (1).zip
+        - odoo-addons/openeducat_erp-11.0.1.0.0.zip

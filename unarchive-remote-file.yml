@@ -7,6 +7,6 @@
   tasks:
     - name: Unarchive openeducat on the remote machine
       ansible.builtin.unarchive:
-        src: /home/blockchain/domineum/addons/web_openeducat-11.0.1.0.0 (1).zip
+        src: /home/blockchain/domineum/addons/openeducat_erp-11.0.1.0.0.zip
         dest: /home/blockchain/domineum/addons/
         remote_src: yes

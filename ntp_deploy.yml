@@ -1,0 +1,6 @@
+---
+- name: deploy ntp 
+  hosts: app 
+  become: yes 
+  roles: 
+    - ntp 
