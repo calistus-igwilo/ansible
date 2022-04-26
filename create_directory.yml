@@ -1,0 +1,17 @@
+---
+- name: Create directory
+  gather_facts: false
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Create directory
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - /usr/share/nginx/html/training.domineum.io
+      tags: create_directory

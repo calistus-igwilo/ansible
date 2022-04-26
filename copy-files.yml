@@ -13,3 +13,4 @@
         owner: root
       loop:
         - odoo-addons/openeducat_erp-11.0.1.0.0.zip
+      tags: copy_file
