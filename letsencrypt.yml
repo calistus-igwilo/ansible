@@ -1,19 +1,20 @@
 ---
 - name: Install Letsencrypt for SSL
   hosts: app
+  gather_facts: false
   become: yes
 
   vars:
     acme_challenge_type: http-01
     acme_directory: https://acme-v02.api.letsencrypt.org/directory
     acme_version: 2
-    acme_email: calistus@domineum_io
+    acme_email: calistus@domineum.io
     letsencrypt_dir: /etc/letsencrypt
     letsencrypt_keys_dir: /etc/letsencrypt/keys
     letsencrypt_csrs_dir: /etc/letsencrypt/csrs
     letsencrypt_certs_dir: /etc/letsencrypt/certs
     letsencrypt_account_key: /etc/letsencrypt/account/account.key
-    domain_name: domineum_io
+    domain_name: training.domineum.io
 
   tasks:
     - name: "Create required directories in /etc/letsencrypt"
@@ -41,18 +42,18 @@
         executable: /bin/bash
 
     - name: "Begin Let's Encrypt challenges"
-      letsencrypt:
+      community.crypto.acme_certificate:
         acme_directory: "{{ acme_directory }}"
         acme_version: "{{ acme_version }}"
         account_key_src: "{{ letsencrypt_account_key }}"
         account_email: "{{ acme_email }}"
         terms_agreed: 1
         challenge: "{{ acme_challenge_type }}"
-        csr: "{{ letsencrypt_csrs_dir }}/{{ domain_name }}.csr"
+        src: "{{ letsencrypt_csrs_dir }}/{{ domain_name }}.csr"
         dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
         fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}.crt"
         remaining_days: 91
-      register: acme_challenge_domineum_io
+      register: acme_challenget_training_domineum_io
 
     - name: "Create .well-known/acme-challenge directory"
       file:
@@ -64,8 +65,8 @@
 
     - name: "Implement http-01 challenge files"
       copy:
-        content: "{{ acme_challenge_domineum_io['challenge_data'][item]['http-01']['resource_value'] }}"
-        dest: "/usr/share/nginx/html/{{ acme_challenge_domineum_io['challenge_data'][item]['http-01']['resource'] }}"
+        content: "{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource_value'] }}"
+        dest: "/usr/share/nginx/html/{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource'] }}"
         owner: root
         group: root
         mode: u=rw,g=r,o=r
@@ -74,7 +75,7 @@
         - "www.{{ domain_name }}"
 
     - name: "Complete Let's Encrypt challenges"
-      letsencrypt:
+      community.crypto.acme_certificate:
         acme_directory: "{{ acme_directory }}"
         acme_version: "{{ acme_version }}"
         account_key_src: "{{ letsencrypt_account_key }}"
@@ -84,4 +85,4 @@
         dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
         chain_dest: "{{ letsencrypt_certs_dir }}/chain_{{ domain_name }}.crt"
         fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}"
-        data: "{{ acme_challenge_domineum_io }}"
+        data: "{{ acme_challenge_training_domineum_io }}"

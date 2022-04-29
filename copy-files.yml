@@ -5,12 +5,18 @@
   become: true
 
   tasks:
-    - name: Copy docker-compose to remote host
+    - name: Copy file to remote host
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /home/blockchain/domineum/addons/
+        dest: /etc/nginx/conf.d/
         mode: "0644"
         owner: root
       loop:
-        - odoo-addons/openeducat_erp-11.0.1.0.0.zip
+        - servers.conf
       tags: copy_file
+
+    - name: Reload Service
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      tags: reload
