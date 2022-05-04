@@ -1,0 +1,11 @@
+---
+- name: install cron job
+  hosts: app
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: "Restart Odoo docker containers after system reboot"
+      cron:
+        special_time: reboot
+        job: "(sleep 30s; cd /home/blockchain/domineum; /usr/local/bin/docker-compose up -d)"

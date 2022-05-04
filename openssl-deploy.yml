@@ -1,0 +1,52 @@
+---
+- name: Install packages
+  hosts: app
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: download  C compiler
+      ansible.builtin.unarchive:
+        src: "http://mirror.0xem.ma/gnu/gcc/gcc-11.3.0/gcc-11.3.0.tar.gz"
+        dest: /usr/src
+        remote_src: true
+      tags: c_down
+
+    - name: download openssl vs 3
+      ansible.builtin.unarchive:
+        src: "https://www.openssl.org/source/old/3.0/openssl-3.0.0.tar.gz"
+        dest: /usr/src
+        remote_src: true
+
+    - name: Install C compiler
+      yum:
+        name:
+          - "@development"
+        state: present
+      tags: group_inst
+
+    - name: Install openssl dependencies
+      yum:
+        name:
+          - perl-IPC-Cmd
+          - perl-Test-Simple
+        state: present
+
+    - name: Install Openssl
+      community.general.make:
+        chdir: /usr/src/openssl-3.0.0
+      become: true
+      tags: openssl
+
+    - name: Create symbolic link to libssl and libcrypto
+      ansible.builtin.file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      loop:
+        - { src: /usr/local/lib64/libssl.so.3, dest: /usr/lib64/libssl.so.3 }
+        - {
+            src: /usr/local/lib64/libcrypto.so.3,
+            dest: /usr/lib64/libcrypto.so.3,
+          }
+      tags: symlink

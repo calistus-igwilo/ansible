@@ -1,0 +1,137 @@
+---
+# create the domain directory for the cert files on localhost
+- name: "Create required directories in /etc/letsencrypt"
+  file:
+    path: "/etc/letsencrypt/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=x,o=x
+  loop:
+    - account
+    - certs
+    - csrs
+    - keys
+    - challenges
+
+- name: Create web domain directory
+  file:
+    path: "/usr/share/nginx/html/{{ domain }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create web domain acme-challenge directory
+  file:
+    path: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Find outdated challenge files
+  find:
+    paths: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge"
+    recurse: no
+    file_type: file
+    age: "1h"
+  register: outdated_challenge_files
+
+- name: Delete outdated challenge files
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  with_items: "{{ outdated_challenge_files.files }}"
+
+# generate account key, if necessary
+- name: Find account.key
+  stat:
+    path: "{{ letsencrypt_dir }}/account/account.key"
+  register: account_key
+  run_once: true
+
+- name: Generate account.key
+  shell: openssl genrsa 4096 > "{{ letsencrypt_dir }}/account/account.key"
+  run_once: true
+  when: account_key.stat.exists == False
+
+# generate domain key, if necessary
+- name: Find domain.key
+  stat:
+    path: "{{ letsencrypt_dir }}/domain/domain.key"
+  register: domain_key
+  run_once: true
+
+- name: Generate domain.key
+  shell: openssl genrsa 4096 > "{{ letsencrypt_dir }}/keys/domain.key"
+  run_once: true
+  when: domain_key.stat.exists == False
+
+# generate domain csr, if necessary
+- name: Find domain.csr
+  stat:
+    path: "{{ letsencrypt_dir }}/csr/domain.csr"
+  register: domain_csr
+  run_once: true
+
+- name: Generate domain.csr
+  shell: openssl req -new -sha256 -key "{{ letsencrypt_dir }}/keys/domain.key" -subj "/CN={{ domain }}" > "{{ letsencrypt_dir }}/csrs/domain.csr"
+  run_once: true
+  when: domain_csr.stat.exists == False
+
+- name: Create challenge
+  acme_certificate:
+    account_key_src: "{{ letsencrypt_dir }}/account/account.key"
+    csr: "{{ letsencrypt_dir }}/csrs/domain.csr"
+    dest: "{{ letsencrypt_dir }}/certs/signed.crt"
+    chain_dest: "{{ letsencrypt_dir }}/certs/intermediate.pem"
+    fullchain_dest: "{{ letsencrypt_dir }}/certs/combined.pem"
+    account_email: "{{ letsencrypt_account_email }}"
+    acme_directory: "{{ letsencrypt_acme_directory }}"
+    acme_version: "{{ letsencrypt_acme_version }}"
+    challenge: "{{ letsencrypt_challenge }}"
+    #agreement: "{{ letsencrypt_agreement }}"
+    remaining_days: "{{ letsencrypt_remaining_days }}"
+    terms_agreed: yes
+  run_once: true
+  register: create_challenge
+
+- block:
+    - name: Create challenge file
+      copy:
+        content: "{{ create_challenge.challenge_data[domain]['http-01']['resource_value'] }}"
+        dest: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge/{{ create_challenge.challenge_data[domain]['http-01']['resource'] | basename }}"
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      loop:
+        - "training.domineum.io"
+        - "www.training.domineum.io"
+      run_once: true
+      register: create_challenge_files
+
+    - name: Create certificate
+      acme_certificate:
+        account_key_src: "{{ letsencrypt_dir }}/account/account.key"
+        csr: "{{ letsencrypt_dir }}/csrs/domain.csr"
+        dest: "{{ letsencrypt_dir }}/certs/signed.crt"
+        chain_dest: "{{ letsencrypt_dir }}/certs/intermediate.pem"
+        fullchain_dest: "{{ letsencrypt_dir }}/certs/combined.pem"
+        account_email: "{{ letsencrypt_account_email }}"
+        acme_directory: "{{ letsencrypt_acme_directory }}"
+        acme_version: "{{ letsencrypt_acme_version }}"
+        challenge: "{{ letsencrypt_challenge }}"
+        #agreement: "{{ letsencrypt_agreement }}"
+        remaining_days: "{{ letsencrypt_remaining_days }}"
+        data: "{{ create_challenge }}"
+        terms_agreed: true
+      run_once: true
+      when: create_challenge is changed
+      register: verify_challenge
+  when: create_challenge is changed
+
+- name: Delete old challenge file
+  file:
+    state: absent
+    path: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge/{{ create_challenge.challenge_data[domain]['http-01']['resource'] | basename }}"

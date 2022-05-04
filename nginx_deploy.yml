@@ -26,3 +26,9 @@
       service:
         name: nginx
         state: started
+
+    - name: Reload NGiNX
+      service:
+        name: nginx
+        state: reloaded
+      tags: reload

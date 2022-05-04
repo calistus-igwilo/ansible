@@ -49,7 +49,7 @@
         account_email: "{{ acme_email }}"
         terms_agreed: 1
         challenge: "{{ acme_challenge_type }}"
-        src: "{{ letsencrypt_csrs_dir }}/{{ domain_name }}.csr"
+        csr: "{{ letsencrypt_csrs_dir }}/{{ domain_name }}.csr"
         dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
         fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}.crt"
         remaining_days: 91
@@ -57,7 +57,7 @@
 
     - name: "Create .well-known/acme-challenge directory"
       file:
-        path: /usr/share/nginx/html/.well-known/acme-challenge
+        path: /usr/share/nginx/html/training.domineum.io/.well-known/acme-challenge
         state: directory
         owner: root
         group: root
@@ -66,7 +66,7 @@
     - name: "Implement http-01 challenge files"
       copy:
         content: "{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource_value'] }}"
-        dest: "/usr/share/nginx/html/{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource'] }}"
+        dest: "/usr/share/nginx/html/training.domineum.io/{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource'] }}"
         owner: root
         group: root
         mode: u=rw,g=r,o=r

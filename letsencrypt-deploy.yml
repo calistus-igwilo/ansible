@@ -1,0 +1,22 @@
+# Let's Encrypt certificates
+- hosts: app
+  become: true
+  gather_facts: True
+  vars:
+    letsencrypt_account_email: "calistus@domineum.io"
+    letsencrypt_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    letsencrypt_acme_version: 2
+    letsencrypt_challenge: "http-01"
+    letsencrypt_agreement: "https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf"
+    letsencrypt_remaining_days: 91
+    letsencrypt_dir: "/etc/letsencrypt"
+    user: "blockchain"
+
+  tasks:
+    - name: Handle certificate
+      include: "{{ playbook_dir }}/letsencrypt2.yml"
+      with_items:
+        - training.domineum.io
+        - www.training.domineum.io
+      loop_control:
+        loop_var: domain

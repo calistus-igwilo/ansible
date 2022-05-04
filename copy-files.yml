@@ -8,15 +8,9 @@
     - name: Copy file to remote host
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /etc/nginx/conf.d/
+        dest: /etc/nginx/conf.d/servers.conf
         mode: "0644"
         owner: root
       loop:
-        - servers.conf
+        - nginx-proxy.conf
       tags: copy_file
-
-    - name: Reload Service
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
-      tags: reload
