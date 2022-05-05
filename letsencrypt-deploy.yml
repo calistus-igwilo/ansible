@@ -17,6 +17,5 @@
       include: "{{ playbook_dir }}/letsencrypt2.yml"
       with_items:
         - training.domineum.io
-        - www.training.domineum.io
       loop_control:
         loop_var: domain

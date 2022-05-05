@@ -59,7 +59,7 @@
 # generate domain key, if necessary
 - name: Find domain.key
   stat:
-    path: "{{ letsencrypt_dir }}/domain/domain.key"
+    path: "{{ letsencrypt_dir }}/keys/domain.key"
   register: domain_key
   run_once: true
 
@@ -100,14 +100,14 @@
 - block:
     - name: Create challenge file
       copy:
-        content: "{{ create_challenge.challenge_data[domain]['http-01']['resource_value'] }}"
-        dest: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge/{{ create_challenge.challenge_data[domain]['http-01']['resource'] | basename }}"
+        content: "{{ create_challenge.challenge_data[item]['http-01']['resource_value'] }}"
+        dest: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge/{{ create_challenge.challenge_data[item]['http-01']['resource'] | basename }}"
         owner: root
         group: root
         mode: u=rw,g=r,o=r
       loop:
-        - "training.domineum.io"
-        - "www.training.domineum.io"
+        - "{{ domain }}"
+        - "www.{{ domain }}"
       run_once: true
       register: create_challenge_files
 

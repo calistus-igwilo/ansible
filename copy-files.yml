@@ -8,9 +8,9 @@
     - name: Copy file to remote host
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /etc/nginx/conf.d/servers.conf
+        dest: /etc/nginx/conf.d/
         mode: "0644"
         owner: root
       loop:
-        - nginx-proxy.conf
+        - servers.conf
       tags: copy_file

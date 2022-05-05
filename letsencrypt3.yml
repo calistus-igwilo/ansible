@@ -1,0 +1,98 @@
+---
+# Let's Encrypt certificates
+- hosts: app
+  become: true
+  gather_facts: True
+
+  vars:
+    letsencrypt_account_email: "calistus@domineum.io"
+    letsencrypt_acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    letsencrypt_acme_version: 2
+    letsencrypt_challenge: "http-01"
+    letsencrypt_agreement: "https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf"
+    letsencrypt_remaining_days: 91
+    letsencrypt_dir: "/etc/letsencrypt"
+    domain: training.domineum.io
+    user: "blockchain"
+
+  tasks:
+    - name: "Create required directories in /etc/letsencrypt"
+      file:
+        path: "/etc/letsencrypt/{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=x,o=x
+      loop:
+        - account
+        - certs
+        - csrs
+        - keys
+
+    - name: Create web domain directory
+      file:
+        path: "/usr/share/nginx/html/{{ domain }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Create web domain acme-challenge directory
+      file:
+        path: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Find outdated challenge files
+      find:
+        paths: "/usr/share/nginx/html/{{ domain }}/.well-known/acme-challenge"
+        recurse: no
+        file_type: file
+        age: "1h"
+      register: outdated_challenge_files
+
+    - name: Delete outdated challenge files
+      file:
+        state: absent
+        path: "{{ item.path }}"
+      with_items: "{{ outdated_challenge_files.files }}"
+
+    # generate account key, if necessary
+    - name: Find account.key
+      stat:
+        path: "{{ letsencrypt_dir }}/account/account.key"
+      register: account_key
+      run_once: true
+
+    - name: Generate account.key
+      shell: openssl genrsa 4096 > "{{ letsencrypt_dir }}/account/account.key"
+      run_once: true
+      when: account_key.stat.exists == False
+
+    # generate domain key, if necessary
+    - name: Find domain.key
+      stat:
+        path: "{{ letsencrypt_dir }}/keys/{{ domain }}.key"
+      register: domain_key
+      run_once: true
+
+    - name: Generate domain.key 
+      shell: openssl genrsa 4096 > "{{ letsencrypt_dir }}/keys/{{ domain }}.key"
+      run_once: true
+      when: domain_key.stat.exists == False
+
+    # generate domain csr, if necessary
+    - name: Find domain.csr
+      stat:
+        path: "{{ letsencrypt_dir }}/csrs/{{ domain }}.csr"
+      register: domain_csr
+      run_once: true
+
+    - name: Generate domain.csr
+      shell: openssl req -new -sha256 -key "{{ letsencrypt_dir }}/keys/{{ domain }}.key" -subj "/CN={{ domain }}" > "{{ letsencrypt_dir }}/csrs/domain.csr"
+      run_once: true
+      when: domain_csr.stat.exists == False
+
+

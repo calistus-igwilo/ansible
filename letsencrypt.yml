@@ -37,9 +37,7 @@
       shell: "openssl genrsa 4096 | sudo tee /etc/letsencrypt/keys/{{ domain_name }}.key"
 
     - name: "Generate Let's Encrypt CSR"
-      shell: "openssl req -new -sha256 -key /etc/letsencrypt/keys/{{ domain_name }}.key -subj \"/CN={{ domain_name }}\" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf \"\n[SAN]\nsubjectAltName=DNS:{{ domain_name }},DNS:www.{{ domain_name }}\")) | sudo tee /etc/letsencrypt/csrs/{{ domain_name }}.csr"
-      args:
-        executable: /bin/bash
+      shell: openssl req -new -sha256 -key "{{ letsencrypt_dir }}/keys/{{ domain_name }}.key" -subj "/CN={{ domain_name }}" > "{{ letsencrypt_dir }}/csrs/{{ domain_name }}.csr"
 
     - name: "Begin Let's Encrypt challenges"
       community.crypto.acme_certificate:
@@ -51,9 +49,10 @@
         challenge: "{{ acme_challenge_type }}"
         csr: "{{ letsencrypt_csrs_dir }}/{{ domain_name }}.csr"
         dest: "{{ letsencrypt_certs_dir }}/{{ domain_name }}.crt"
+        chain_dest: "{{ letsencrypt_dir }}/certs/intermediate.pem"
         fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ domain_name }}.crt"
         remaining_days: 91
-      register: acme_challenget_training_domineum_io
+      register: acme_challenge_training_domineum_io
 
     - name: "Create .well-known/acme-challenge directory"
       file:
@@ -65,14 +64,11 @@
 
     - name: "Implement http-01 challenge files"
       copy:
-        content: "{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource_value'] }}"
-        dest: "/usr/share/nginx/html/training.domineum.io/{{ acme_challenge_training_domineum_io['challenge_data'][item]['http-01']['resource'] }}"
+        content: "{{ acme_challenge_training_domineum_io['challenge_data'][domain_name]['http-01']['resource_value'] }}"
+        dest: "/usr/share/nginx/html/training.domineum.io/{{ acme_challenge_training_domineum_io['challenge_data'][domain_name]['http-01']['resource'] }}"
         owner: root
         group: root
         mode: u=rw,g=r,o=r
-      loop:
-        - "{{ domain_name }}"
-        - "www.{{ domain_name }}"
 
     - name: "Complete Let's Encrypt challenges"
       community.crypto.acme_certificate:
