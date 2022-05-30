@@ -1,6 +1,4 @@
-# Lines beginning with a # are comments, and are only included for
-# illustration. These comments are overkill for most inventory files.
-
+# Ansible inventory file for vagrant VMs on Virtualbox
 # Application servers
 [app]
 192.168.56.10
