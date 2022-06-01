@@ -12,5 +12,5 @@
         mode: "0644"
         owner: root
       loop:
-        - servers.conf
+        - nginx-proxy.conf
       tags: copy_file

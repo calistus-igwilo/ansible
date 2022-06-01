@@ -5,7 +5,7 @@
   become: true
 
   vars:
-    project_src: /home/blockchain/domineum
+    project_src: /home/blockchain/training
 
   tasks:
     - name: Run docker-compose up -d
