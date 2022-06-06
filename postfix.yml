@@ -1,0 +1,35 @@
+- name: configuring postfix mail server
+  hosts: mailserver
+  vars:
+    pkg:
+      - postfix
+      - cyrus-sasl-plain
+      - mailx
+    svc: postfix
+  tasks:
+    - name: installing {{ pkg }} packages
+      yum:
+        name: "{{ pkg }}"
+        state: present
+    - name: enabling and starting {{ svc }} service
+      service:
+        name: "{{ svc }}"
+        state: started
+        enabled: true
+    - name: adding required lines in /etc/postfix/main.cf file
+      template:
+        src: main.cf.j2
+        dest: /etc/postfix/main.cf
+    - name: configuring postfix sasl creds
+      copy:
+        content: '[smtp.gmail.com]:587 your_email:your_password'
+        dest: /etc/postfix/sasl_passwd
+        owner: root
+        group: postfix
+        mode: 0640
+    - name:
+      command: postmap /etc/postfix/sasl_passwd
+    - name: enabling and starting {{ svc }} service
+      service:
+        name: "{{ svc }}"
+        state: restarted
