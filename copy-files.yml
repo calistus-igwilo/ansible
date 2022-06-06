@@ -8,9 +8,9 @@
     - name: Copy file to remote host
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /etc/nginx/conf.d/servers.conf
+        dest: /home/blockchain/wordpress/docker-compose.yml
         mode: "0644"
-        owner: root
+        owner: blockchain
       loop:
-        - nginx-proxy.conf
+        - wordpress_docker_compose.yml
       tags: copy_file

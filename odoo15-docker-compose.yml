@@ -11,13 +11,13 @@ services:
     volumes:
       - ./postgresql:/var/lib/postgresql/data
 
-  odoo15:
+  web:
     image: odoo:15
     user: root
     depends_on:
       - db
     ports:
-      - "8075:8069"
+      - "8073:8069"
       # - "20015:8072" # live chat
     tty: true
     command: --
@@ -30,5 +30,5 @@ services:
       #- /etc/localtime:/etc/localtime:ro
       # - ./entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
       - ./addons:/mnt/extra-addons
-      - ./etc:/etc/odoo
+      - ./conf:/etc/odoo
     restart: always # run as a service

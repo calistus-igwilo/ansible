@@ -5,7 +5,7 @@
   become: yes
 
   vars:
-    odoo_app_path: /home/blockchain/conference
+    odoo_app_path: /home/blockchain/prod
     odoo_user: blockchain
 
   tasks:

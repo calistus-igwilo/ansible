@@ -13,5 +13,5 @@
         owner: blockchain
         group: blockchain
       loop:
-        - /home/blockchain/jobs
+        - /home/blockchain/wordpress
       tags: create_directory

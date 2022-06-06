@@ -5,7 +5,7 @@
   become: true
 
   vars:
-    project_src: /home/blockchain/training
+    project_src: /home/blockchain/wordpress
 
   tasks:
     - name: Run docker-compose up -d
