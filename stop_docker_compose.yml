@@ -5,7 +5,7 @@
   become: true
 
   vars:
-    project_src: /home/blockchain/prod
+    project_src: /home/blockchain/wordpress
 
   tasks:
     - name: docker-compose stop

@@ -10,8 +10,8 @@
         path: "{{ item }}"
         state: directory
         mode: "0755"
-        owner: blockchain
-        group: blockchain
+        owner: root
+        group: root
       loop:
-        - /home/blockchain/wordpress
+        - /etc/nginx/ssl
       tags: create_directory

@@ -10,5 +10,5 @@
   tasks:
     - name: Run docker-compose up -d
       shell:
-        cmd: "docker-compose up -d"
+        cmd: "docker-compose up -d --build"
         chdir: "{{ project_src }}"
