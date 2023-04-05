@@ -9,10 +9,10 @@
 
   tasks:
     - name: Ensure NTP (for the synchronization) is installed
-      yum: name=ntp state=present
+      apt: name=ntp state=present
 
     - name: Ensure NTP is running.
-      service: name=ntpd state=started enabled=yes
+      service: name=ntp state=started enabled=yes
 
     - name: set timezone to Africa/Lagos
       timezone:
